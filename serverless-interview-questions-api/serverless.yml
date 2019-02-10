@@ -1,0 +1,150 @@
+service: interview-questions-api
+
+custom: 
+  secrets: ${file(secrets.json)}
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: us-east-1
+  environment:
+    TOKEN_SECRET: ${self:custom.secrets.TOKEN_SECRET}
+    DATABASE_URL: ${self:custom.secrets.DATABASE_URL}
+
+plugins:
+  - serverless-offline
+
+functions:
+  verify-token:
+    handler: auth/VerifyToken.auth
+
+  login:
+    handler: auth/AuthHandler.login
+    events:
+        - http:
+            path: login
+            method: post
+            cors: true
+  
+  signup:
+    handler: auth/AuthHandler.signup
+    events:
+        - http:
+            path: signup
+            method: post
+            cors: true
+  
+  me:
+    handler: auth/AuthHandler.me
+    events:
+        - http:
+            path: me
+            method: get
+            cors: true
+            authorizer: verify-token
+  
+  getAllJobs:
+    handler: api/JobHandler.getAllJobs
+    events:
+      - http:
+          path: api/v1/jobs
+          method: get
+          cors: true
+
+  getJob:
+    handler: api/JobHandler.getJob
+    events:
+      - http:
+          path: api/v1/jobs/{id}
+          method: get
+          cors: true
+
+  createJob:
+    handler: api/JobHandler.createJob
+    events:
+      - http:
+          path: api/v1/jobs
+          method: post
+          cors: true
+
+  getAllSubJobs:
+    handler: api/SubJobHandler.getAllSubJobs
+    events:
+      - http:
+          path: api/v1/jobs/{id}/subjobs
+          method: get
+          cors: true
+
+  getSubJob:
+    handler: api/SubJobHandler.getSubJob
+    events:
+      - http:
+          path: api/v1/jobs/{id}/subjobs/{subJobId}
+          method: get
+          cors: true
+
+  createSubJob:
+    handler: api/SubJobHandler.createSubJob
+    events:
+      - http:
+          path: api/v1/jobs/{id}/subjobs
+          method: post
+          cors: true
+
+  getAllQuestions:
+    handler: api/QuestionHandler.getAllQuestions
+    events:
+      - http:
+          path: api/v1/jobs/{id}/subjobs/{subJobId}/questions
+          method: get
+          cors: true
+
+  getQuestion:
+    handler: api/QuestionHandler.getQuestion
+    events:
+      - http:
+          path: api/v1/jobs/{id}/subjobs/{subJobId}/questions/{questionId}
+          method: get
+          cors: true
+
+  createQuestion:
+    handler: api/QuestionHandler.createQuestion
+    events:
+      - http:
+          path: api/v1/jobs/{id}/subjobs/{subJobId}/questions/
+          method: post
+          cors: true
+          authorizer: verify-token
+
+  likeQuestion:
+    handler: api/QuestionHandler.likeQuestion
+    events:
+      - http:
+          path: api/v1/jobs/{id}/subjobs/{subJobId}/questions/{questionId}/like
+          method: put
+          cors: true
+          authorizer: verify-token
+
+  unlikeQuestion:
+    handler: api/QuestionHandler.unlikeQuestion
+    events:
+      - http:
+          path: api/v1/jobs/{id}/subjobs/{subJobId}/questions/{questionId}/unlike
+          method: put
+          cors: true
+          authorizer: verify-token
+
+  deleteQuestion:
+    handler: api/QuestionHandler.deleteQuestion
+    events:
+      - http:
+          path: api/v1/jobs/{id}/subjobs/{subJobId}/questions/{questionId}
+          method: delete
+          cors: true
+          authorizer: verify-token
+
+  
+    
+
+
